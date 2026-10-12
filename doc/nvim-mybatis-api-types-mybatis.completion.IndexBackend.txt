@@ -1,4 +1,4 @@
-*nvim-mybatis-api-types-mybatis.completion.IndexBackend.txt*For NVIM v0.8.0Last change: 2026 August 21
+*nvim-mybatis-api-types-mybatis.completion.IndexBackend.txt*For NVIM v0.8.0Last change: 2026 October 12
 
 ==============================================================================
 Table of Contents*nvim-mybatis-api-types-mybatis.completion.IndexBackend-table-of-contents*
