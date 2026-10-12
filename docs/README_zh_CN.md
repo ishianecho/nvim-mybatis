@@ -1,6 +1,6 @@
 # nvim-mybatis
 
-简体中文 | [English](/README.md)
+简体中文 | [English](https://github.com/ishianecho/nvim-mybatis/blob/main/docs/README.md)
 
 一款基于 Tree-sitter 的轻量级 Neovim 插件，用于增强 Java MyBatis Mapper 接口与其对应 XML 文件之间的导航体验。
 

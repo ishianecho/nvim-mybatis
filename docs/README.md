@@ -1,6 +1,6 @@
 # nvim-mybatis
 
-[简体中文](/docs/README_zh_CN.md) | English
+[简体中文](https://github.com/ishianecho/nvim-mybatis/blob/main/docs/README_zh_CN.md) | English
 
 A lightweight Neovim plugin powered by Tree-sitter for enhanced navigation between Java MyBatis Mapper interfaces and their corresponding XML files.
 
