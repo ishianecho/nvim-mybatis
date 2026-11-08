@@ -1,18 +1,15 @@
-*nvim-mybatis-api-types-mybatis.NvimMybatisConfig.txt*For NVIM v0.8.0Last change: 2026 August 21
+*nvim-mybatis-api-types-mybatis.NvimMybatisConfig.txt*For NVIM v0.8.0Last change: 2026 November 08
 
 ==============================================================================
 Table of Contents*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-table-of-contents*
 
 1. class NvimMybatisConfig|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig|
   - ## fields|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-##-fields|
-  - ### NvimMybatisConfig.autocmd|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.autocmd|
-  - ### NvimMybatisConfig.xml_search_pattern|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.xml_search_pattern|
-  - ### NvimMybatisConfig.xml_search_tool|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.xml_search_tool|
-  - ### NvimMybatisConfig.completion_provider|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.completion_provider|
-  - ### NvimMybatisConfig.mapper_name_pattern|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.mapper_name_pattern|
   - ### NvimMybatisConfig.classpaths|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.classpaths|
-  - ### NvimMybatisConfig.root_file|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.root_file|
   - ### NvimMybatisConfig.debug|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.debug|
+  - ### NvimMybatisConfig.lsp|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.lsp|
+  - ### NvimMybatisConfig.mapper_glob|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.mapper_glob|
+  - ### NvimMybatisConfig.parser|nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.parser|
 
 ==============================================================================
 1. class NvimMybatisConfig*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig*
@@ -24,69 +21,13 @@ Table of Contents*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-table-of-cont
 ## FIELDS*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-##-fields*
 
 
-### NVIMMYBATISCONFIG.AUTOCMD*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.autocmd*
-
->lua
-    NvimMybatisConfig.autocmd : boolean?
-<
-
-Enable filetype autocmds and buffer-local gd navigation mappings
-
-
-### NVIMMYBATISCONFIG.XML_SEARCH_PATTERN*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.xml_search_pattern*
-
->lua
-    NvimMybatisConfig.xml_search_pattern : string[]?
-<
-
-Patterns to search for XML files
-
-
-### NVIMMYBATISCONFIG.XML_SEARCH_TOOL*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.xml_search_tool*
-
->lua
-    NvimMybatisConfig.xml_search_tool : mybatis.utils.SearchTool?
-<
-
-Tool to search XML files, "default": try all tools in order "rg", "ag", "grep"
-
-
-### NVIMMYBATISCONFIG.COMPLETION_PROVIDER*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.completion_provider*
-
->lua
-    NvimMybatisConfig.completion_provider : mybatis.completion.Provider?
-<
-
-XML Completion provider, "default": try all providers in order "index", "jdtls"
-
-
-### NVIMMYBATISCONFIG.MAPPER_NAME_PATTERN*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.mapper_name_pattern*
-
->lua
-    NvimMybatisConfig.mapper_name_pattern : string[]?
-<
-
-Lua string.match patterns to identify Mapper XML files. Plugin navigation is
-only enabled when an opened XML filename matches these patterns
-
-
 ### NVIMMYBATISCONFIG.CLASSPATHS*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.classpaths*
 
 >lua
-    NvimMybatisConfig.classpaths : { java: string[]?, xml: string[]? }?
+    NvimMybatisConfig.classpaths : string[]?
 <
 
-Relative paths from classpath to project/module root
-
-
-### NVIMMYBATISCONFIG.ROOT_FILE*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.root_file*
-
->lua
-    NvimMybatisConfig.root_file : string[]?
-<
-
-Root build files to locate project/module root (searches upward from current
-file)
+Source roots; `java` and `resources` subdirectories are appended per scan kind
 
 
 ### NVIMMYBATISCONFIG.DEBUG*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.debug*
@@ -96,6 +37,34 @@ file)
 <
 
 Enable debug mode
+
+
+### NVIMMYBATISCONFIG.LSP*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.lsp*
+
+>lua
+    NvimMybatisConfig.lsp : boolean?
+<
+
+attach the built-in MyBatis language server (completion, inlay hints, code
+actions, definition); `false` keeps only treesitter-based jump
+
+
+### NVIMMYBATISCONFIG.MAPPER_GLOB*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.mapper_glob*
+
+>lua
+    NvimMybatisConfig.mapper_glob : string?
+<
+
+Glob pattern identifying mapper files by name
+
+
+### NVIMMYBATISCONFIG.PARSER*nvim-mybatis-api-types-mybatis.NvimMybatisConfig-class-nvimmybatisconfig-###-nvimmybatisconfig.parser*
+
+>lua
+    NvimMybatisConfig.parser : mybatis.parser.Option?
+<
+
+Tree-sitter grammar for mapper XML
 
 Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
 

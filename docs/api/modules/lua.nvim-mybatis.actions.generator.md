@@ -33,29 +33,6 @@ Get the arguments used to generate a CRUD tag at the current cursor.
 
 
 
-### M.generate_tag
----
-```lua
-function M.generate_tag(
-  range: lsp.Range,
-  context: lsp.CodeActionContext,
-  bufnr: integer
-) ->  lsp.CodeAction?
-```
-
-
-
-
-
-CodeAction: Generate MyBatis Tag
-
-
-
-
-
-
-
-
 ### M.generate_tag_command
 ---
 ```lua
@@ -71,29 +48,6 @@ function M.generate_tag_command(bufnr: integer?) -> generated boolean
 
 
 Generate a CRUD tag directly from the current mapper method.
-
-
-
-
-
-
-
-
-### M.get_code_actions
----
-```lua
-function M.get_code_actions(
-  range: lsp.Range,
-  context: lsp.CodeActionContext,
-  bufnr: integer
-) ->  lsp.CodeAction[]
-```
-
-
-
-
-
-Get All CodeAction
 
 
 

@@ -1,3 +1,12 @@
+nvim-mybatis-README-nvim-mybatis	nvim-mybatis-README.txt	/*nvim-mybatis-README-nvim-mybatis*
+nvim-mybatis-README-nvim-mybatis-commands	nvim-mybatis-README.txt	/*nvim-mybatis-README-nvim-mybatis-commands*
+nvim-mybatis-README-nvim-mybatis-configuration	nvim-mybatis-README.txt	/*nvim-mybatis-README-nvim-mybatis-configuration*
+nvim-mybatis-README-nvim-mybatis-contributing	nvim-mybatis-README.txt	/*nvim-mybatis-README-nvim-mybatis-contributing*
+nvim-mybatis-README-nvim-mybatis-features	nvim-mybatis-README.txt	/*nvim-mybatis-README-nvim-mybatis-features*
+nvim-mybatis-README-nvim-mybatis-installation	nvim-mybatis-README.txt	/*nvim-mybatis-README-nvim-mybatis-installation*
+nvim-mybatis-README-nvim-mybatis-license	nvim-mybatis-README.txt	/*nvim-mybatis-README-nvim-mybatis-license*
+nvim-mybatis-README-table-of-contents	nvim-mybatis-README.txt	/*nvim-mybatis-README-table-of-contents*
+nvim-mybatis-README.txt	nvim-mybatis-README.txt	/*nvim-mybatis-README.txt*
 nvim-mybatis-README_en-nvim-mybatis	nvim-mybatis-README_en.txt	/*nvim-mybatis-README_en-nvim-mybatis*
 nvim-mybatis-README_en-nvim-mybatis-⌨️-commands	nvim-mybatis-README_en.txt	/*nvim-mybatis-README_en-nvim-mybatis-⌨️-commands*
 nvim-mybatis-README_en-nvim-mybatis-✨-features	nvim-mybatis-README_en.txt	/*nvim-mybatis-README_en-nvim-mybatis-✨-features*
@@ -13,5 +22,6 @@ nvim-mybatis-api-index-types	nvim-mybatis-api.txt	/*nvim-mybatis-api-index-types
 nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-links	nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator.txt	/*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-links*
 nvim-mybatis-api-modules-lua.nvim-mybatis.navigator-links	nvim-mybatis-api-modules-lua.nvim-mybatis.navigator.txt	/*nvim-mybatis-api-modules-lua.nvim-mybatis.navigator-links*
 nvim-mybatis-api-table-of-contents	nvim-mybatis-api.txt	/*nvim-mybatis-api-table-of-contents*
+nvim-mybatis-api-types-mybatis.parser.Option-#-alias-option	nvim-mybatis-api-types-mybatis.parser.Option.txt	/*nvim-mybatis-api-types-mybatis.parser.Option-#-alias-option*
 nvim-mybatis-api-types-mybatis.treesitter.Query-class-query	nvim-mybatis-api-types-mybatis.treesitter.Query.txt	/*nvim-mybatis-api-types-mybatis.treesitter.Query-class-query*
 nvim-mybatis-api.txt	nvim-mybatis-api.txt	/*nvim-mybatis-api.txt*
