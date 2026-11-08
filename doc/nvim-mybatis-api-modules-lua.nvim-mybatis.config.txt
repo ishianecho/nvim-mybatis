@@ -1,4 +1,4 @@
-*nvim-mybatis-api-modules-lua.nvim-mybatis.config.txt*For NVIM v0.8.0Last change: 2026 August 21
+*nvim-mybatis-api-modules-lua.nvim-mybatis.config.txt*For NVIM v0.8.0Last change: 2026 November 08
 
 ==============================================================================
 Table of Contents*nvim-mybatis-api-modules-lua.nvim-mybatis.config-table-of-contents*
@@ -24,24 +24,16 @@ Table of Contents*nvim-mybatis-api-modules-lua.nvim-mybatis.config-table-of-cont
     function M.setup(config: mybatis.NvimMybatisConfig?) ->  table
 <
 
-Defaults: `autocmd = true`, `xml_search_pattern = { "**/*Mapper*.xml" }`,
-`xml_search_tool = "default"`, `completion_provider = "default"`,
-`mapper_name_pattern = { "[Mm]apper" }`, Java/XML classpaths of `src/main/java`
-and `src/main/resources`, Maven/Gradle root files, and `debug = false`.
-
 
 ### M.GET*nvim-mybatis-api-modules-lua.nvim-mybatis.config-global-lua.nvim-mybatis.config-###-m.get*
 
 >lua
     function M.get() ->  mybatis.NvimMybatisConfig {
-        autocmd = boolean?,
-        xml_search_pattern = string[]?,
-        xml_search_tool = mybatis.utils.SearchTool?,
-        completion_provider = mybatis.completion.Provider?,
-        mapper_name_pattern = string[]?,
-        classpaths = { java: string[]?, xml: string[]? }?,
-        root_file = string[]?,
+        classpaths = string[]?,
         debug = boolean?,
+        lsp = boolean?,
+        mapper_glob = string?,
+        parser = mybatis.parser.Option?,
     }
 <
 
@@ -53,14 +45,11 @@ and `src/main/resources`, Maven/Gradle root files, and `debug = false`.
 
 >lua
     M.values : mybatis.NvimMybatisConfig {
-        autocmd: boolean?,
-        xml_search_pattern: string[]?,
-        xml_search_tool: mybatis.utils.SearchTool?,
-        completion_provider: mybatis.completion.Provider?,
-        mapper_name_pattern: string[]?,
-        classpaths: { java: string[]?, xml: string[]? }?,
-        root_file: string[]?,
+        classpaths: string[]?,
         debug: boolean?,
+        lsp: boolean?,
+        mapper_glob: string?,
+        parser: mybatis.parser.Option?,
     }
 <
 

@@ -1,4 +1,4 @@
-*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator.txt*For NVIM v0.8.0Last change: 2026 August 21
+*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator.txt*For NVIM v0.8.0Last change: 2026 November 08
 
 ==============================================================================
 Table of Contents*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-table-of-contents*
@@ -6,9 +6,7 @@ Table of Contents*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-ta
 1. global lua.nvim-mybatis.actions.generator|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator|
   - ## methods|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-##-methods|
   - ### M.get_crud_args|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.get_crud_args|
-  - ### M.generate_tag|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.generate_tag|
   - ### M.generate_tag_command|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.generate_tag_command|
-  - ### M.get_code_actions|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.get_code_actions|
   - ## fields|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-##-fields|
   - ### M.SUPPORT_CMDS|nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.support_cmds|
 2. Links   |nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-links|
@@ -32,19 +30,6 @@ Table of Contents*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-ta
 Get the arguments used to generate a CRUD tag at the current cursor.
 
 
-### M.GENERATE_TAG*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.generate_tag*
-
->lua
-    function M.generate_tag(
-      range: lsp.Range,
-      context: lsp.CodeActionContext,
-      bufnr: integer
-    ) ->  lsp.CodeAction?
-<
-
-CodeAction: Generate MyBatis Tag
-
-
 ### M.GENERATE_TAG_COMMAND*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.generate_tag_command*
 
 >lua
@@ -56,19 +41,6 @@ CodeAction: Generate MyBatis Tag
 @return `generated` - whether the cursor is on a mapper method
 
 Generate a CRUD tag directly from the current mapper method.
-
-
-### M.GET_CODE_ACTIONS*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-###-m.get_code_actions*
-
->lua
-    function M.get_code_actions(
-      range: lsp.Range,
-      context: lsp.CodeActionContext,
-      bufnr: integer
-    ) ->  lsp.CodeAction[]
-<
-
-Get All CodeAction
 
 
 ## FIELDS*nvim-mybatis-api-modules-lua.nvim-mybatis.actions.generator-global-lua.nvim-mybatis.actions.generator-##-fields*

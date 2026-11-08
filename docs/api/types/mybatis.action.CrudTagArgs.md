@@ -56,12 +56,12 @@ method name
 ### CrudTagArgs.resultType
 ---
 ```lua
-CrudTagArgs.resultType : string
+CrudTagArgs.resultType : string?
 ```
 
 
 
-`resultType` attribute
+`resultType` attribute (defaults to `"resultType"`)
 
 
 
@@ -73,9 +73,9 @@ CrudTagArgs.resultType : string
 ### CrudTagArgs.bufnr
 ---
 ```lua
-CrudTagArgs.bufnr : integer
+CrudTagArgs.bufnr : integer?
 ```
 
 
 
-Java source file buffer number
+Java source file buffer number (defaults to the current buffer)
