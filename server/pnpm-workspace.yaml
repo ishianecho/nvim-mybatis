@@ -1,5 +1,5 @@
-onlyBuiltDependencies:
-  - esbuild
-ignoredBuiltDependencies:
-  - tree-sitter
-  - tree-sitter-java
+allowBuilds:
+  esbuild: true
+  tree-sitter: false
+  tree-sitter-java: false
+  tree-sitter-mybatis: false

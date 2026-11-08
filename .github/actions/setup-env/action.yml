@@ -246,7 +246,7 @@ runs:
       shell: bash
       run: |
         nvim --headless -u tests/minimal_init.lua \
-          -c "lua require('nvim-treesitter').install({ 'java', 'xml' }):wait(300000)" \
+          -c "lua require('nvim-treesitter').install({ 'java', 'xml' }):wait(900000)" \
           -c "qa!"
         git clone --depth 1 https://github.com/ishianecho/tree-sitter-mybatis /tmp/tree-sitter-mybatis
         tree-sitter build -o "$HOME/.local/share/nvim/site/parser/mybatis.so" /tmp/tree-sitter-mybatis
