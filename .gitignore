@@ -9,3 +9,6 @@ target/
 build/
 
 *.log
+
+# built-in LSP server
+server/node_modules/

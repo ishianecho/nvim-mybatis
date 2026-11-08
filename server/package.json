@@ -1,0 +1,31 @@
+{
+  "name": "nvim-mybatis-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.10.1",
+  "scripts": {
+    "build": "pnpm run bundle && pnpm run grammars && pnpm run runtime",
+    "bundle": "esbuild src/index.mts --bundle --format=esm --platform=node --outfile=dist/mybatis.mjs --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
+    "grammars": "mkdir -p dist/grammars && tree-sitter build --wasm -o dist/grammars/mybatis.wasm node_modules/tree-sitter-mybatis && tree-sitter build --wasm -o dist/grammars/java.wasm node_modules/tree-sitter-java",
+    "runtime": "cp node_modules/web-tree-sitter/web-tree-sitter.wasm dist/",
+    "check": "prettier --check . && tsc --noEmit",
+    "test": "node --test",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "vscode-languageserver": "^11.0.0",
+    "vscode-languageserver-textdocument": "^1.0.16",
+    "vscode-uri": "^3.2.0",
+    "web-tree-sitter": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "prettier": "^3.9.10",
+    "tree-sitter": "^0.25.1",
+    "tree-sitter-java": "^0.23.5",
+    "tree-sitter-mybatis": "github:ishianecho/tree-sitter-mybatis",
+    "typescript": "^5.9.0"
+  }
+}
