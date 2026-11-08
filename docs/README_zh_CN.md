@@ -23,7 +23,7 @@
 }
 ```
 
-需要 `PATH` 中的 Node.js 与 nvim-treesitter 的 java 解析器，若缺少 `server/dist`，运行 `cd server && pnpm install && pnpm build` 构建
+需要 `PATH` 中的 Node.js 与 nvim-treesitter 的 java 解析器
 
 
 ## 配置
@@ -42,7 +42,34 @@
 - `parser`：Mapper XML 使用的语法 —— `auto` 在已安装 [tree-sitter-mybatis](https://github.com/ishianecho/tree-sitter-mybatis) 时使用它，否则回退到内置 `xml` 解析器；`mybatis` 强制使用（缺失时警告并回退）；`xml` 始终使用内置解析器
 - `classpaths` / `mapper_glob`：扫描 Java 类与 Mapper XML 文件的位置
 
-服务器以名为 `"mybatis"` 的 LSP 客户端运行（通过 `vim.lsp.start()` 启动，`root_dir` 为检测到的项目根目录），并在 Mapper XML 缓冲区与 Maven/Gradle 根目录下的 Java 缓冲区上映射 buffer-local 的 `gd` 到 `:MybatisJump`，可通过按 `client.name == "mybatis"` 过滤的 `LspAttach` 自动命令自定义；如需完全掌控，设置 `lsp = false` 后自行以 `cmd = { "node", "<plugin>/server/dist/mybatis.mjs" }` 启动（保持名称 `"mybatis"`）
+服务器以名为 `"mybatis"` 的 LSP 客户端运行（通过 `vim.lsp.start()` 启动，`root_dir` 为检测到的项目根目录），并在 Mapper XML 缓冲区与 Maven/Gradle 根目录下的 Java 缓冲区上映射 buffer-local 的 `gd` 到 `:MybatisJump`，可通过按 `client.name == "mybatis"` 过滤的 `LspAttach` 自动命令自定义：
+
+```lua
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client.name == "mybatis" then
+      vim.keymap.set("n", "gd", "<Cmd>MybatisJump<CR>", { buffer = args.buf })
+    end
+  end,
+})
+```
+
+如需完全掌控，设置 `lsp = false` 后通过 `vim.lsp.config` / `vim.lsp.enable` 自行管理（保持名称 `"mybatis"`）：
+
+```lua
+vim.lsp.config("mybatis", {
+  cmd = { "node", "/path/to/nvim-mybatis/server/dist/mybatis.mjs" },
+  filetypes = { "xml", "mybatis", "java" },
+  root_markers = { "pom.xml", "build.gradle" },
+  init_options = {
+    mapper_glob = "**/*[Mm]apper*",
+    classpaths = { "src/main" },
+  },
+})
+
+vim.lsp.enable("mybatis")
+```
 
 仅使用 `xml` 解析器时，`#{}` / `${}` 参数通过行文本识别，不支持跨行参数
 
@@ -57,4 +84,4 @@
 
 ## 许可证
 
-MIT —— 详见 [LICENSE](LICENSE)
+[MIT](LICENSE)

@@ -23,7 +23,7 @@ A Neovim plugin for MyBatis: jump between Java mapper interfaces and XML files, 
 }
 ```
 
-Requires Node.js on `PATH` and the java parser from nvim-treesitter. If `server/dist` is missing, build it with `cd server && pnpm install && pnpm build`.
+Requires Node.js on `PATH` and the java parser from nvim-treesitter.
 
 ## Configuration
 
@@ -41,7 +41,34 @@ Requires Node.js on `PATH` and the java parser from nvim-treesitter. If `server/
 - `parser`: grammar for mapper XML — `auto` uses [tree-sitter-mybatis](https://github.com/ishianecho/tree-sitter-mybatis) when installed and falls back to the built-in `xml` parser; `mybatis` requires it (warns and falls back if missing); `xml` always uses the built-in one
 - `classpaths` / `mapper_glob`: where java classes and mapper XML files are scanned
 
-The server runs as an LSP client named `"mybatis"` (started with `vim.lsp.start()`, `root_dir` = detected project root) and maps buffer-local `gd` to `:MybatisJump` on mapper XML buffers and java buffers under a Maven/Gradle root. Customize with a `LspAttach` autocmd filtered by `client.name == "mybatis"`; for full control set `lsp = false` and start the server yourself with `cmd = { "node", "<plugin>/server/dist/mybatis.mjs" }` (keep the name `"mybatis"`).
+The server runs as an LSP client named `"mybatis"` (started with `vim.lsp.start()`, `root_dir` = detected project root) and maps buffer-local `gd` to `:MybatisJump` on mapper XML buffers and java buffers under a Maven/Gradle root. Customize it with an `LspAttach` autocmd filtered by `client.name == "mybatis"`:
+
+```lua
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client.name == "mybatis" then
+      vim.keymap.set("n", "gd", "<Cmd>MybatisJump<CR>", { buffer = args.buf })
+    end
+  end,
+})
+```
+
+For full control, set `lsp = false` and manage the client yourself with `vim.lsp.config` / `vim.lsp.enable` (keep the name `"mybatis"`):
+
+```lua
+vim.lsp.config("mybatis", {
+  cmd = { "node", "/path/to/nvim-mybatis/server/dist/mybatis.mjs" },
+  filetypes = { "xml", "mybatis", "java" },
+  root_markers = { "pom.xml", "build.gradle" },
+  init_options = {
+    mapper_glob = "**/*[Mm]apper*",
+    classpaths = { "src/main" },
+  },
+})
+
+vim.lsp.enable("mybatis")
+```
 
 With the plain `xml` parser, `#{}` / `${}` parameters are detected from line text, so multi-line parameters are not recognized.
 
@@ -56,4 +83,4 @@ Issues and feature requests are welcome at the [GitHub Issues page](https://gith
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+[MIT](LICENSE)
