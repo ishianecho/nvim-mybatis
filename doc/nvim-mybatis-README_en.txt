@@ -64,7 +64,7 @@ Lazy.nvim ~
 
 >lua
     {
-      "ishi-o/nvim-mybatis",
+      "ishianecho/nvim-mybatis",
       opts = {},
     }
 <
@@ -141,7 +141,7 @@ installing those autocmds.
 🤝 CONTRIBUTING      *nvim-mybatis-README_en-nvim-mybatis-🤝-contributing*
 
 Issues and feature requests are welcome on the GitHub Issues page
-<https://github.com/ishi-o/nvim-mybatis/issues>.
+<https://github.com/ishianecho/nvim-mybatis/issues>.
 
 
 📄 LICENSE                *nvim-mybatis-README_en-nvim-mybatis-📄-license*

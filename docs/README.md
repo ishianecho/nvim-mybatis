@@ -2,119 +2,58 @@
 
 [简体中文](https://github.com/ishianecho/nvim-mybatis/blob/main/docs/README_zh_CN.md) | English
 
-A lightweight Neovim plugin powered by Tree-sitter for enhanced navigation between Java MyBatis Mapper interfaces and their corresponding XML files.
+A Neovim plugin for MyBatis: jump between Java mapper interfaces and XML files, with a built-in language server providing completion, inlay hints, and code actions.
 
-## ✨ Features
+## Features
 
-### 🔄 **Navigation**
+- Navigation (`gd`)
+  - XML → Java: type attributes (`namespace`, `resultType`, `parameterType`, `type`, `javaType`, `ofType`, `typeHandler`) → class; statement `id` → mapper method; `<result property>` → entity field; `#{param.path}` → parameter or entity field
+  - Java → XML: mapper method → statement tag; entity field → `<result property>`; interface → `<mapper>` root
+  - XML → XML: `<include refid>` → `<sql>`; `resultMap` / `extends` → resultMap definition
+- Completion: element tags, attribute names, Java class names (fully qualified), mapper method ids, property paths in `#{}` / `${}`, fragment and resultMap names
+- Inlay hints: method signature at the end of the statement's opening-tag line; parameter type inside the placeholder (`#{Long id}`)
+- Code action: `Generate MyBatis Tag` on a mapper interface method, also available as `:MybatisGenerateTag`
 
-#### XML Mapping File → Java Code
-
-- Navigate from MyBatis XML type attributes to their corresponding Java types, supporting attributes: `namespace`, `resultType`, `parameterType`, `type`, `javaType`, `ofType`, `typeHandler`.
-- Navigate from the `id` attribute of SQL statement tags to the corresponding method in the Mapper interface.
-- Navigate from a `<result property="...">` tag to the corresponding field in its Java entity class.
-
-#### Java Code → XML Mapping File
-
-- Navigate from a Mapper interface to the `<mapper namespace="...">` declaration in its XML file.
-- Navigate from a Mapper interface method to its corresponding SQL statement tag in the XML file.
-
-#### XML → XML Navigation
-
-- Navigate from an `<include refid="...">` tag to its target `<sql id="...">` definition, supporting both simple and fully-qualified references.
-- Navigate from a `<resultMap extends="...">` or `<select resultMap="...">` tag to its target `<resultMap>` definition.
-
-### 🎯 **Intelligent Code Completion**
-
-- **[blink.cmp](https://github.com/Saghen/blink.cmp) Integration**: Auto-completion for `namespace`, `resultType`, `parameterType`, `type`, `javaType`, or `ofType` attributes with package/class suggestions
-
-### **Code Action**
-
-- `nvim-mybatis` injects `Code Action` into the language server named `jdtls`. Qualified entries will be provided when `vim.lsp.buf.code_action` is invoked, which requires a connected `jdtls` server.
-- `Generate MyBatis Tag`: When the cursor points to a method in a Mapper interface, this action intelligently determines the `CRUD` type and generates the corresponding `XML tag` snippet in the associated `XML` file.
-- The same action is available as the `:MybatisGenerateTag` command.
-
-## 📦 Installation
-
-<details>
-<summary>Lazy.nvim</summary>
+## Installation
 
 ```lua
 {
-  "ishi-o/nvim-mybatis",
+  "ishianecho/nvim-mybatis",
   opts = {},
 }
 ```
 
-</details>
+Requires Node.js on `PATH` and the java parser from nvim-treesitter. If `server/dist` is missing, build it with `cd server && pnpm install && pnpm build`.
 
-<details>
-<summary>blink.cmp Integration</summary>
-
-For auto-completion support, configure blink.cmp as follows:
-
-```lua
-require("blink.cmp").setup({
-	sources = {
-		default = {
-			"lsp",
-			"path",
-			"snippets",
-			"buffer",
-			"mybatis", -- Add this source
-		},
-		providers = {
-			mybatis = {
-				name = "Mybatis",
-				module = "nvim-mybatis.completion.blink",
-			},
-		},
-	},
-})
-```
-
-</details>
-
-## ⚙️ Configuration
-
-Pass configuration through the plugin's `opts` table. See `:help nvim-mybatis-api` for the available options and defaults.
-
-### Default configuration
+## Configuration
 
 ```lua
 {
-	autocmd = true,
-	xml_search_pattern = { "**/*Mapper*.xml" },
-	xml_search_tool = "default",
-	completion_provider = "default",
-	mapper_name_pattern = { "[Mm]apper" },
-	classpaths = {
-		java = { "src/main/java" },
-		xml = { "src/main/resources" },
-	},
-	root_file = { "pom.xml", "build.gradle", "build.gradle.kts" },
-	debug = false,
+  classpaths = { "src/main" },
+  debug = false,
+  lsp = true,
+  mapper_glob = "**/*[Mm]apper*",
+  parser = "auto",
 }
 ```
 
-## ⌨️ Commands
+- `lsp`: attach the built-in language server (definition, completion, inlay hints, code actions); `false` keeps only the treesitter-based jump
+- `parser`: grammar for mapper XML — `auto` uses [tree-sitter-mybatis](https://github.com/ishianecho/tree-sitter-mybatis) when installed and falls back to the built-in `xml` parser; `mybatis` requires it (warns and falls back if missing); `xml` always uses the built-in one
+- `classpaths` / `mapper_glob`: where java classes and mapper XML files are scanned
 
-After calling `require("nvim-mybatis").setup()`, the following commands are available:
+The server runs as an LSP client named `"mybatis"` (started with `vim.lsp.start()`, `root_dir` = detected project root) and maps buffer-local `gd` to `:MybatisJump` on mapper XML buffers and java buffers under a Maven/Gradle root. Customize with a `LspAttach` autocmd filtered by `client.name == "mybatis"`; for full control set `lsp = false` and start the server yourself with `cmd = { "node", "<plugin>/server/dist/mybatis.mjs" }` (keep the name `"mybatis"`).
 
-- `:MybatisJump`: Navigate from the current Java mapper or XML mapping file. If nvim-mybatis cannot find a target, it falls back to `vim.lsp.buf.definition()`.
-- `:MybatisGenerateTag`: Generate the CRUD XML tag for the mapper method under the cursor.
+With the plain `xml` parser, `#{}` / `${}` parameters are detected from line text, so multi-line parameters are not recognized.
 
-The optional `autocmd = true` setting keeps the existing filetype autocmds and buffer-local `gd` mappings. Set it to `false` to use the commands without installing those autocmds.
+## Commands
 
-## 📝 Notes
+- `:MybatisJump`: jump between mapper XML and Java; falls back to `vim.lsp.buf.definition()` when MyBatis has no target
+- `:MybatisGenerateTag`: generate the CRUD XML tag for the mapper method under the cursor
 
-- **[nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)**: Required for the Java and XML parsers.
-- The public configuration, Lua API, and type reference is available in the generated `:help nvim-mybatis-api` documentation.
+## Contributing
 
-## 🤝 Contributing
+Issues and feature requests are welcome at the [GitHub Issues page](https://github.com/ishianecho/nvim-mybatis/issues).
 
-Issues and feature requests are welcome on the [GitHub Issues page](https://github.com/ishi-o/nvim-mybatis/issues).
+## License
 
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE)
