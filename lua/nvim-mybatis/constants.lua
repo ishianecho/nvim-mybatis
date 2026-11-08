@@ -12,16 +12,50 @@ local TYPE_ATTRIBUTES = {
 	"typeHandler",
 }
 
---- XML tags whose `id` attributes refer to mapper methods.
+--- Element node types whose `id` attribute refers to a mapper method.
 --- @type string[]
-local CRUD_TAGS = {
+local STATEMENT_ELEMENTS = {
+	"SelElem",
+	"InsElem",
+	"UpdElem",
+	"DelElem",
+	"ProcElem",
+	"SelKeyElem",
+}
+
+--- Tag names whose `id` attribute refers to a mapper method.
+--- @type string[]
+local STATEMENT_TAGS = {
 	"select",
+	"insert",
 	"update",
 	"delete",
-	"insert",
+	"procedure",
+	"selectKey",
+}
+
+--- Root tag names that carry the mapper `namespace`.
+--- @type string[]
+local ROOT_TAGS = {
+	"mapper",
+	"sqlMap",
+}
+
+--- tree-sitter-mybatis element node types mapped to their tag names.
+--- @type table<string, string>
+local NAMED_ELEMENT_TYPES = {
+	Mapper = "mapper",
+	MapperSTag = "mapper",
+	MapperETag = "mapper",
+	SqlMap = "sqlMap",
+	SqlMapSTag = "sqlMap",
+	SqlMapETag = "sqlMap",
 }
 
 return {
 	TYPE_ATTRIBUTES = TYPE_ATTRIBUTES,
-	CRUD_TAGS = CRUD_TAGS,
+	STATEMENT_ELEMENTS = STATEMENT_ELEMENTS,
+	STATEMENT_TAGS = STATEMENT_TAGS,
+	ROOT_TAGS = ROOT_TAGS,
+	NAMED_ELEMENT_TYPES = NAMED_ELEMENT_TYPES,
 }

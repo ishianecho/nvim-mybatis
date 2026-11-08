@@ -11,8 +11,8 @@ function M.generate_crud(args)
 	local interface, method, resultType, bufnr
 	interface = args.interface
 	method = args.method
-	resultType = args.resultType
-	bufnr = args.bufnr
+	resultType = args.resultType or "resultType"
+	bufnr = args.bufnr or vim.api.nvim_get_current_buf()
 	interface = treesitter.scan.package(bufnr) .. "." .. interface
 	local xml_file = utils.search_mapper(interface)
 	if not xml_file then

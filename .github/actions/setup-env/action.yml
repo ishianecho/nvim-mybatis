@@ -47,7 +47,7 @@ inputs:
     required: false
     default: "false"
   parsers:
-    description: Install the Java and XML Tree-sitter parsers
+    description: Install the Java, XML, and MyBatis Tree-sitter parsers
     required: false
     default: "false"
 
@@ -223,13 +223,23 @@ runs:
         revision="$(git -C tests/deps/nvim-treesitter rev-parse HEAD)"
         echo "revision=$revision" >> "$GITHUB_OUTPUT"
 
+    - name: Resolve tree-sitter-mybatis revision
+      id: mybatis_parser
+      if: inputs.parsers == 'true'
+      shell: bash
+      run: |
+        revision="$(git ls-remote https://github.com/ishianecho/tree-sitter-mybatis HEAD | cut -f1)"
+        echo "revision=$revision" >> "$GITHUB_OUTPUT"
+
     - name: Cache Tree-sitter parsers
       id: parsers_cache
       if: inputs.parsers == 'true'
       uses: actions/cache/restore@v5
       with:
-        path: ~/.local/share/nvim/site/parser
-        key: nvim-treesitter-parsers-${{ runner.os }}-${{ steps.neovim_version.outputs.version }}-${{ inputs.tree_sitter_version }}-${{ steps.nvim_treesitter.outputs.revision }}
+        path: |
+          ~/.local/share/nvim/site/parser
+          ~/.local/share/nvim/site/queries/mybatis
+        key: nvim-treesitter-parsers-${{ runner.os }}-${{ steps.neovim_version.outputs.version }}-${{ inputs.tree_sitter_version }}-${{ steps.nvim_treesitter.outputs.revision }}-${{ steps.mybatis_parser.outputs.revision }}
 
     - name: Install Tree-sitter parsers
       if: inputs.parsers == 'true' && steps.parsers_cache.outputs.cache-hit != 'true'
@@ -238,6 +248,10 @@ runs:
         nvim --headless -u tests/minimal_init.lua \
           -c "lua require('nvim-treesitter').install({ 'java', 'xml' }):wait(300000)" \
           -c "qa!"
+        git clone --depth 1 https://github.com/ishianecho/tree-sitter-mybatis /tmp/tree-sitter-mybatis
+        tree-sitter build -o "$HOME/.local/share/nvim/site/parser/mybatis.so" /tmp/tree-sitter-mybatis
+        mkdir -p "$HOME/.local/share/nvim/site/queries"
+        cp -r /tmp/tree-sitter-mybatis/queries/mybatis "$HOME/.local/share/nvim/site/queries/mybatis"
 
     - name: Verify Tree-sitter parsers
       if: inputs.parsers == 'true'
@@ -245,6 +259,8 @@ runs:
       run: |
         test -f "$HOME/.local/share/nvim/site/parser/java.so"
         test -f "$HOME/.local/share/nvim/site/parser/xml.so"
+        test -f "$HOME/.local/share/nvim/site/parser/mybatis.so"
+        test -d "$HOME/.local/share/nvim/site/queries/mybatis"
 
     - name: Save StyLua cache
       if: inputs.stylua == 'true' && steps.stylua_cache.outputs.cache-hit != 'true'
@@ -285,5 +301,7 @@ runs:
       if: inputs.parsers == 'true' && steps.parsers_cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v5
       with:
-        path: ~/.local/share/nvim/site/parser
+        path: |
+          ~/.local/share/nvim/site/parser
+          ~/.local/share/nvim/site/queries/mybatis
         key: ${{ steps.parsers_cache.outputs.cache-primary-key }}

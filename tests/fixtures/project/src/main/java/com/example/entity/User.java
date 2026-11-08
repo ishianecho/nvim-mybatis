@@ -7,6 +7,8 @@ public class User {
 
 	private String email;
 
+	private Profile profile;
+
 	public Long getId() {
 		return id;
 	}

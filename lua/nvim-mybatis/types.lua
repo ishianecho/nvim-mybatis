@@ -1,57 +1,24 @@
 --- @module 'mybatis.types'
 --- Public EmmyLua types used by nvim-mybatis.
 
---- @alias mybatis.completion.ContextKind
---- | "class" completion of fully-qualified java class names
---- | "method" completion of mapper interface method names
---- | "field" completion of entity field names
---- | "refid" completion of `<sql id>` fragment ids
-
---- @class mybatis.completion.Context
---- @field kind mybatis.completion.ContextKind
---- @field bufnr? integer buffer the completion was requested in
---- @field value_node? TSNode the AttValue node being completed
---- @field namespace? string mapper namespace (`method` context)
---- @field type? string owning entity type (`field` context)
-
---- @alias mybatis.completion.Provider
---- | "index"
---- | "jdtls"
---- | "default"
-
---- @class mybatis.completion.Backend
---- @field get_completion_items fun(partial: string, ctx: mybatis.completion.Context, callback: fun(items: lsp.CompletionItem[])): nil
---- @field get_completion_items_sync? fun(partial: string, ctx: mybatis.completion.Context): lsp.CompletionItem[]
---- @field is_available fun():boolean
-
---- @class mybatis.completion.IndexBackend: mybatis.completion.Backend
---- @field resolve fun(simple_name: string): string?
---- @field refresh fun(): nil
-
 --- @class mybatis.treesitter.Query
 --- @field lang string
 --- @field query string
 
---- @alias mybatis.utils.SearchTool
---- | "rg"
---- | "ag"
---- | "grep"
---- | "default"
-
---- @alias mybatis.utils.SearchToolHandler fun(namespace_pattern: string, mapper_dir: string): string?
+--- @alias mybatis.parser.Option
+--- | "auto" use tree-sitter-mybatis when installed, otherwise the built-in xml grammar
+--- | "mybatis" require tree-sitter-mybatis, fall back to xml with a warning
+--- | "xml" always use the built-in xml grammar
 
 --- @class mybatis.NvimMybatisConfig
---- @field autocmd? boolean Enable filetype autocmds and buffer-local gd navigation mappings
---- @field xml_search_pattern? string[] Patterns to search for XML files
---- @field xml_search_tool? mybatis.utils.SearchTool Tool to search XML files, "default": try all tools in order "rg", "ag", "grep"
---- @field completion_provider? mybatis.completion.Provider XML Completion provider, "default": try all providers in order "index", "jdtls"
---- @field mapper_name_pattern? string[] Lua string.match patterns to identify Mapper XML files. Plugin navigation is only enabled when an opened XML filename matches these patterns
---- @field classpaths? { java?: string[], xml?: string[] } Relative paths from classpath to project/module root
---- @field root_file? string[] Root build files to locate project/module root (searches upward from current file)
+--- @field classpaths? string[] Source roots; `java` and `resources` subdirectories are appended per scan kind
 --- @field debug? boolean Enable debug mode
+--- @field lsp? boolean attach the built-in MyBatis language server (completion, inlay hints, code actions, definition); `false` keeps only treesitter-based jump
+--- @field mapper_glob? string Glob pattern identifying mapper files by name
+--- @field parser? mybatis.parser.Option Tree-sitter grammar for mapper XML
 
 --- @class mybatis.action.CrudTagArgs
 --- @field interface string interface name
 --- @field method string method name
---- @field resultType string `resultType` attribute
---- @field bufnr integer Java source file buffer number
+--- @field resultType? string `resultType` attribute (defaults to `"resultType"`)
+--- @field bufnr? integer Java source file buffer number (defaults to the current buffer)

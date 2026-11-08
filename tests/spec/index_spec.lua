@@ -1,0 +1,63 @@
+local helpers = require("spec.helpers")
+local index = require("nvim-mybatis.index")
+
+local XML = "project/src/main/resources/mapper/UserMapper.xml"
+
+describe("index", function()
+	before_each(function()
+		helpers.cd_project()
+		index.reset()
+	end)
+
+	after_each(function()
+		vim.cmd("%bdelete!")
+		vim.cmd("cd -")
+	end)
+
+	it("finds the xml file of a namespace", function()
+		local path = index.file_for_namespace("com.example.mapper.UserMapper")
+		assert.is_not_nil(path)
+		assert.truthy(vim.fs.normalize(path):find("UserMapper%.xml$"))
+	end)
+
+	it("returns nil for unknown namespaces", function()
+		assert.is_nil(index.file_for_namespace("com.example.NoSuchMapper"))
+	end)
+
+	it("resolves plain refids inside the same file", function()
+		local path = index.file_for_namespace("com.example.mapper.UserMapper")
+		local target = index.sql_fragment("baseColumns", path)
+		assert.is_not_nil(target)
+		assert.equals(path, target.path)
+		assert.equals("baseColumns", target.id)
+	end)
+
+	it("resolves namespace-qualified refids", function()
+		local target = index.sql_fragment("com.example.mapper.UserMapper.baseColumns", nil)
+		assert.is_not_nil(target)
+		assert.equals("baseColumns", target.id)
+	end)
+
+	it("returns nil for unknown refids", function()
+		assert.is_nil(index.sql_fragment("noSuchFragment", nil))
+	end)
+
+	it("indexes statement and resultMap ids of a file", function()
+		local path = index.file_for_namespace("com.example.mapper.UserMapper")
+		assert.is_not_nil(path)
+		index.ensure()
+		local sql_ids = index.sql_ids(path)
+		assert.equals(1, #sql_ids)
+		assert.equals("baseColumns", sql_ids[1])
+	end)
+
+	it("updates a file entry from its live buffer tree", function()
+		local bufnr = helpers.load_buf(XML, "xml", "mybatis")
+		index.update_buffer(bufnr)
+		local path = vim.api.nvim_buf_get_name(bufnr)
+		assert.equals(path, index.file_for_namespace("com.example.mapper.UserMapper"))
+		local target = index.sql_fragment("baseColumns", path)
+		assert.is_not_nil(target)
+		assert.equals(path, target.path)
+	end)
+end)

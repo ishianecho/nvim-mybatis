@@ -20,7 +20,7 @@
 	</select>
 	<insert id="insertUser" parameterType="com.example.entity.User">
 		insert into users (username, email)
-		values (#{username}, #{email})
+		values (#{user.username}, #{user.email}, #{user.profile.bio})
 	</insert>
 	<update id="updateEmail">
 		update users set email = #{email} where id = #{id}

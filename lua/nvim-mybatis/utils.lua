@@ -4,26 +4,29 @@ local uv = vim.uv or vim.loop
 local config = require("nvim-mybatis.config"):get()
 local logger = require("nvim-mybatis.logger")
 
---- check if the filename matches config.mapper_name_pattern
+local ROOT_FILES = { "pom.xml", "build.gradle", "build.gradle.kts" }
+
+local compiled_glob = nil
+local compiled = nil
+
+--- match a filename against the configured `mapper_glob`
+--- @param filename string
+--- @return boolean
+function M.matches_mapper_glob(filename)
+	if compiled_glob ~= config.mapper_glob then
+		compiled = vim.glob.to_lpeg(config.mapper_glob)
+		compiled_glob = config.mapper_glob
+	end
+	return compiled:match(filename) ~= nil
+end
+
+--- check if the filename matches the mapper glob
 --- @param bufnr? integer
 --- @return boolean
 function M.is_mybatis_file(bufnr)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t:r")
-	for _, pattern in ipairs(config.mapper_name_pattern) do
-		if filename:match(pattern) then
-			return true
-		end
-	end
-	return false
-end
-
---- check if the file is java and mybatis file
---- @param bufnr? integer
---- @return boolean
-function M.is_mybatis_java(bufnr)
-	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	return vim.bo[bufnr].filetype == "java" and M.is_mybatis_file(bufnr)
+	local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
+	return M.matches_mapper_glob(filename)
 end
 
 --- check if the file is xml and mybatis file
@@ -31,7 +34,8 @@ end
 --- @return boolean
 function M.is_mybatis_xml(bufnr)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	return vim.bo[bufnr].filetype == "xml" and M.is_mybatis_file(bufnr)
+	return vim.tbl_contains({ "xml", "mybatis" }, vim.bo[bufnr].filetype)
+		and M.is_mybatis_file(bufnr)
 end
 
 local function parent_dir(dir)
@@ -43,7 +47,7 @@ local function parent_dir(dir)
 end
 
 local function has_root_file(dir)
-	for _, filename in ipairs(config.root_file) do
+	for _, filename in ipairs(ROOT_FILES) do
 		if vim.fn.filereadable(dir .. "/" .. filename) == 1 then
 			return true
 		end
@@ -54,7 +58,7 @@ end
 --- get project / module root dir
 --- @return string?
 function M.get_module_root()
-	for _, filename in ipairs(config.root_file) do
+	for _, filename in ipairs(ROOT_FILES) do
 		local found_file = vim.fn.findfile(filename, ".;")
 		if found_file ~= "" then
 			return vim.fn.fnamemodify(found_file, ":p:h")
@@ -79,32 +83,6 @@ function M.get_project_root()
 		dir = parent_dir(dir)
 	end
 	return project_root
-end
-
---- get java builtin types
----@return string[]
-function M.get_java_builtin_types()
-	return {
-		"String",
-		"Integer",
-		"Long",
-		"Double",
-		"Float",
-		"Boolean",
-		"Short",
-		"Byte",
-		"Character",
-		"Object",
-		"Void",
-		"Class",
-		"List",
-		"Map",
-		"Set",
-		"Collection",
-		"ArrayList",
-		"HashMap",
-		"HashSet",
-	}
 end
 
 --- default directory name patterns excluded when scanning java sources
@@ -156,20 +134,18 @@ function M.scan_java_classes(dir_path, current_pkg, exclude_dirs)
 end
 
 --- @param func fun(classpath: string): boolean?
---- @param classpaths string[]
+--- @param suffix string "java" or "resources"
 --- @return boolean
-function M.foreach_classpath(func, classpaths)
+function M.foreach_classpath(func, suffix)
 	local project_root = M.get_project_root()
 	if not project_root then
 		logger.warn(
-			"Module root not found (missing root file: "
-				.. table.concat(config.root_file, ", ")
-				.. ")"
+			"Module root not found (missing root file: " .. table.concat(ROOT_FILES, ", ") .. ")"
 		)
 		return false
 	end
-	for _, classpath in ipairs(classpaths) do
-		local relative_classpath = classpath:gsub("/$", "")
+	for _, root in ipairs(config.classpaths) do
+		local relative_classpath = root:gsub("/$", "") .. "/" .. suffix
 		local paths = vim.fn.glob(project_root .. "/**/" .. relative_classpath, false, true)
 		local direct_path = project_root .. "/" .. relative_classpath
 		if #paths == 0 then
@@ -184,97 +160,85 @@ function M.foreach_classpath(func, classpaths)
 	return false
 end
 
---- @type mybatis.utils.SearchToolHandler
-local function search_mapper_fallback_rg(namespace_pattern, mapper_dir)
-	local glob_args = {}
-	for _, glob_pattern in ipairs(config.xml_search_pattern) do
-		table.insert(glob_args, string.format('--glob="%s"', glob_pattern))
-	end
-	if #glob_args == 0 then
-		table.insert(glob_args, '--glob="*.xml"')
-	end
+local class_map = nil
+local class_map_root = nil
 
-	local glob_str = table.concat(glob_args, " ")
-
-	local cmd = string.format(
-		"rg -l --color=never --fixed-strings %s '%s' '%s'",
-		glob_str,
-		namespace_pattern,
-		mapper_dir
-	)
-	local result = vim.fn.system(cmd)
-	if vim.v.shell_error == 0 then
-		return result:match("[^\r\n]+")
+--- resolve a class name to its fully-qualified form (unique simple names only)
+--- @param classname string
+--- @return string? fqn
+function M.resolve_class(classname)
+	if classname:find(".", 1, true) then
+		return classname
 	end
-	return nil
+	local project_root = M.get_project_root()
+	if not project_root then
+		return nil
+	end
+	if class_map == nil or class_map_root ~= project_root then
+		class_map = {}
+		local ambiguous = {}
+		M.foreach_classpath(function(classpath)
+			for _, fqn in ipairs(M.scan_java_classes(classpath, "")) do
+				local simple = fqn:match("[^.]+$")
+				if simple and not ambiguous[simple] then
+					if class_map[simple] then
+						if class_map[simple] ~= fqn then
+							ambiguous[simple] = true
+							class_map[simple] = nil
+						end
+					else
+						class_map[simple] = fqn
+					end
+				end
+			end
+			return false
+		end, "java")
+		class_map_root = project_root
+	end
+	return class_map[classname]
 end
 
---- @type mybatis.utils.SearchToolHandler
-local function search_mapper_fallback_ag(namespace_pattern, mapper_dir)
-	local glob_args = {}
-	for _, glob_pattern in ipairs(config.xml_search_pattern) do
-		table.insert(glob_args, string.format("-G '%s'", glob_pattern))
-	end
-	if #glob_args == 0 then
-		table.insert(glob_args, "-G '*.xml'")
-	end
-	local glob_str = table.concat(glob_args, " ")
-
-	local cmd = string.format("ag -l %s '%s' '%s'", glob_str, namespace_pattern, mapper_dir)
-	local result = vim.fn.system(cmd)
-	if vim.v.shell_error == 0 then
-		return result:match("[^\r\n]+")
-	end
-	return nil
-end
-
---- @type mybatis.utils.SearchToolHandler
-local function search_mapper_fallback_grep(namespace_pattern, mapper_dir)
-	vim.fn.grep({
-		args = { "-r", "-l", "--include=*.xml", vim.pesc(namespace_pattern), mapper_dir },
-	})
-
-	local qf = vim.fn.getqflist()
-	if qf and #qf > 0 then
-		return qf[1].filename
-	end
-
-	return nil
-end
-
---- search mappers.xml by namespace
+--- search mappers.xml by namespace through the mapper index
 --- @param namespace string
 --- @return string? file
 function M.search_mapper(namespace)
-	local namespace_pattern = string.format('namespace="%s"', namespace)
-	local result = nil
-	--- @type table<mybatis.utils.SearchTool, mybatis.utils.SearchToolHandler>
-	local tools = {
-		rg = search_mapper_fallback_rg,
-		ag = search_mapper_fallback_ag,
-		grep = search_mapper_fallback_grep,
-	}
-	--- @type mybatis.utils.SearchTool[]
-	local tool_order = { "rg", "ag", "grep" }
-	M.foreach_classpath(function(classpath)
-		if config.xml_search_tool ~= "default" then
-			return tools[config.xml_search_tool](namespace_pattern, classpath)
-		end
-		for _, name in ipairs(tool_order) do
-			if name == "grep" or vim.fn.executable(name) ~= 0 then
-				result = tools[name](namespace_pattern, classpath)
-				if result then
-					return true
-				end
-			end
-		end
-		return false
-	end, config.classpaths.xml)
+	local index = require("nvim-mybatis.index")
+	local result = index.file_for_namespace(namespace)
 	if result == nil then
 		logger.warn("No XML file found for mapper: " .. namespace)
 		return nil
 	end
 	return result
+end
+
+--- find the java source file of a fully-qualified class name on the classpaths
+--- @param classname string
+--- @return string? file
+function M.find_java_file(classname)
+	local filepath = classname:gsub("%.", "/") .. ".java"
+	local result
+	M.foreach_classpath(function(classpath)
+		local full = classpath .. filepath
+		if vim.fn.filereadable(full) == 1 then
+			result = full
+			return true
+		end
+		return false
+	end, "java")
+	return result
+end
+
+--- load a java class source into a hidden buffer for treesitter parsing
+--- @param classname string
+--- @return integer? bufnr
+function M.load_java_buffer(classname)
+	local file = M.find_java_file(classname)
+	if not file then
+		return nil
+	end
+	local bufnr = vim.fn.bufadd(file)
+	vim.fn.bufload(bufnr)
+	return bufnr
 end
 
 return M

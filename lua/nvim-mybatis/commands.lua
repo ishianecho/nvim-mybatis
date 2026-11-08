@@ -10,6 +10,23 @@ local generator = require("nvim-mybatis.actions.generator")
 local navigator = require("nvim-mybatis.navigator")
 
 local function jump()
+	local client = vim.lsp.get_clients({ bufnr = 0, name = "mybatis" })[1]
+	if client then
+		local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+		client:request("textDocument/definition", params, function(err, result)
+			if err then
+				vim.lsp.buf.definition()
+				return
+			end
+			local location = vim.islist(result) and result[1] or result
+			if location then
+				vim.lsp.util.show_document(location, client.offset_encoding, { reuse_win = true })
+			else
+				vim.lsp.buf.definition()
+			end
+		end)
+		return
+	end
 	if not navigator.jump() then
 		vim.lsp.buf.definition()
 	end

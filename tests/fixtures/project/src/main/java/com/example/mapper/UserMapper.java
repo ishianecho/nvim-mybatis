@@ -2,6 +2,8 @@ package com.example.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.example.entity.User;
 
 public interface UserMapper {
@@ -9,7 +11,7 @@ public interface UserMapper {
 
 	List<User> findUsersByUsername(String username);
 
-	int insertUser(User user);
+	int insertUser(@Param("user") User user);
 
 	int updateEmail(Long id, String email);
 

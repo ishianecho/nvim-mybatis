@@ -1,0 +1,66 @@
+local helpers = require("spec.helpers")
+local config = require("nvim-mybatis.config")
+local navigator = require("nvim-mybatis.navigator")
+local index = require("nvim-mybatis.index")
+
+local XML = "project/src/main/resources/mapper/UserMapper.xml"
+local JAVA = "project/src/main/java/com/example/entity/User.java"
+
+local function current_name()
+	return vim.fs.basename(vim.api.nvim_buf_get_name(0))
+end
+
+describe("navigator", function()
+	before_each(function()
+		config.setup({})
+		helpers.cd_project()
+		index.reset()
+	end)
+
+	after_each(function()
+		config.setup({})
+		vim.cmd("%bdelete!")
+		vim.cmd("cd -")
+	end)
+
+	it("jumps from a #{} path to the mapper method parameter", function()
+		helpers.load_buf(XML, "mybatis")
+		assert.truthy(helpers.goto_mark("where id = #{id}", 13))
+		assert.truthy(navigator.jump())
+		assert.equals("UserMapper.java", current_name())
+		assert.truthy(vim.api.nvim_get_current_line():find("Long id", 1, true))
+	end)
+
+	it("jumps from a #{} path to a later parameter by name", function()
+		helpers.load_buf(XML, "mybatis")
+		assert.truthy(helpers.goto_mark("set email = #{email}", 14))
+		assert.truthy(navigator.jump())
+		assert.equals("UserMapper.java", current_name())
+		assert.truthy(vim.api.nvim_get_current_line():find("String email", 1, true))
+	end)
+
+	it("jumps from a #{} path to the entity field through parameterType", function()
+		helpers.load_buf(XML, "mybatis")
+		assert.truthy(helpers.goto_mark("values (#{username}", 11))
+		assert.truthy(navigator.jump())
+		assert.equals("User.java", current_name())
+		assert.truthy(vim.api.nvim_get_current_line():find("String username", 1, true))
+	end)
+
+	it("jumps from a #{} path with the xml grammar through the line fallback", function()
+		config.setup({ parser = "xml" })
+		helpers.load_buf(XML, "xml", "xml")
+		assert.truthy(helpers.goto_mark("where id = #{id}", 13))
+		assert.truthy(navigator.jump())
+		assert.equals("UserMapper.java", current_name())
+		assert.truthy(vim.api.nvim_get_current_line():find("Long id", 1, true))
+	end)
+
+	it("jumps from an entity field to the resultMap property", function()
+		helpers.load_buf(JAVA, "java")
+		assert.truthy(helpers.goto_mark("String username"))
+		assert.truthy(navigator.jump())
+		assert.equals("UserMapper.xml", current_name())
+		assert.truthy(vim.api.nvim_get_current_line():find('property="username"', 1, true))
+	end)
+end)

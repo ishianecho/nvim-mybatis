@@ -16,7 +16,7 @@ function M.jump(bufnr)
 	if utils.is_mybatis_xml(bufnr) then
 		return M.xml.navigate_from_xml(bufnr)
 	end
-	if utils.is_mybatis_java(bufnr) then
+	if vim.bo[bufnr].filetype == "java" and utils.get_module_root() then
 		return M.java.navigate_from_java(bufnr)
 	end
 	return false

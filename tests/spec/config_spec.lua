@@ -1,5 +1,4 @@
 local config = require("nvim-mybatis.config")
-local constants = require("nvim-mybatis.constants")
 
 describe("config", function()
 	after_each(function()
@@ -8,21 +7,35 @@ describe("config", function()
 
 	it("applies overrides while retaining unrelated defaults", function()
 		config.setup({
-			xml_search_tool = "grep",
-			classpaths = {
-				java = { "custom/java" },
-			},
+			debug = true,
+			classpaths = { "custom/main" },
 		})
 
-		assert.equals("grep", config.get().xml_search_tool)
-		assert.same({ "custom/java" }, config.get().classpaths.java)
-		assert.same({ "src/main/resources" }, config.get().classpaths.xml)
+		assert.is_true(config.get().debug)
+		assert.same({ "custom/main" }, config.get().classpaths)
+		assert.equals("auto", config.get().parser)
 	end)
 
 	it("resets overrides when setup is called again", function()
-		config.setup({ xml_search_tool = "grep" })
+		config.setup({ debug = true })
 		config.setup()
 
-		assert.equals("default", config.get().xml_search_tool)
+		assert.is_false(config.get().debug)
+	end)
+
+	it("defaults to exactly the supported options", function()
+		assert.same({
+			classpaths = { "src/main" },
+			debug = false,
+			lsp = true,
+			mapper_glob = "**/*[Mm]apper*",
+			parser = "auto",
+		}, config.get())
+	end)
+
+	it("can disable the language server", function()
+		config.setup({ lsp = false })
+
+		assert.is_false(config.get().lsp)
 	end)
 end)

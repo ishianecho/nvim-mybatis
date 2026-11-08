@@ -33,33 +33,6 @@ function M.get_crud_args(bufnr)
 	}
 end
 
---- CodeAction: Generate MyBatis Tag
---- @param range lsp.Range
---- @param context lsp.CodeActionContext
---- @param bufnr integer
---- @return lsp.CodeAction?
-function M.generate_tag(range, context, bufnr)
-	local CA_TITLE = "Generate MyBatis Tag"
-	local CMD = "mybatis.generate_crud"
-	local args = M.get_crud_args(bufnr)
-	if not args then
-		return nil
-	end
-	return {
-		title = CA_TITLE,
-		--- @type lsp.CodeActionKind
-		kind = "refactor",
-		--- @type lsp.Command
-		command = {
-			title = CA_TITLE,
-			command = CMD,
-			arguments = {
-				args,
-			},
-		},
-	}
-end
-
 --- Generate a CRUD tag directly from the current mapper method.
 --- @param bufnr? integer Java source file buffer number
 --- @return boolean generated whether the cursor is on a mapper method
@@ -71,24 +44,6 @@ function M.generate_tag_command(bufnr)
 	end
 	handler.generate_crud(args)
 	return true
-end
-
---- Get All CodeAction
---- @param range lsp.Range
---- @param context lsp.CodeActionContext
---- @param bufnr integer
---- @return lsp.CodeAction[]
-function M.get_code_actions(range, context, bufnr)
-	local raw_actions = {
-		M.generate_tag(range, context, bufnr),
-	}
-	local actions = {}
-	for _, action in ipairs(raw_actions) do
-		if action ~= nil then
-			table.insert(actions, action)
-		end
-	end
-	return actions
 end
 
 return M

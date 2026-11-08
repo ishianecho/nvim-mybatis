@@ -12,15 +12,17 @@ end
 --- load a fixture file into a buffer, make it the current buffer
 --- @param relpath string path relative to tests/fixtures/
 --- @param filetype string
+--- @param lang? string treesitter language (defaults to `filetype`)
 --- @return integer bufnr
-function M.load_buf(relpath, filetype)
+function M.load_buf(relpath, filetype, lang)
+	lang = lang or filetype
 	local file = M.fixture(relpath)
 	local bufnr = vim.fn.bufadd(file)
 	vim.fn.bufload(bufnr)
 	vim.bo[bufnr].filetype = filetype
 	vim.api.nvim_set_current_buf(bufnr)
-	vim.treesitter.start(bufnr, filetype)
-	vim.treesitter.get_parser(bufnr, filetype):parse()
+	vim.treesitter.start(bufnr, lang)
+	vim.treesitter.get_parser(bufnr, lang):parse()
 	return bufnr
 end
 

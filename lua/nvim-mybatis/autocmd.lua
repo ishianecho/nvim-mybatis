@@ -1,37 +1,24 @@
 local M = {}
 
 local autocmd = vim.api.nvim_create_autocmd
-local map = vim.keymap.set
 local utils = require("nvim-mybatis.utils")
-local navigator = require("nvim-mybatis.navigator")
 local logger = require("nvim-mybatis.logger")
 
-local function jump(bufnr)
-	if not navigator.jump(bufnr) then
-		vim.lsp.buf.definition()
-	end
-end
-
---- Register MyBatis filetype autocmds and buffer-local `gd` mappings.
+--- Register MyBatis filetype autocmds.
 function M.setup()
-	local group = vim.api.nvim_create_augroup("MyBatis", {})
+	local group = vim.api.nvim_create_augroup("NvimMybatis", {})
 	autocmd("FileType", {
-		pattern = "xml",
+		pattern = { "xml", "mybatis" },
 		group = group,
 		callback = function(args)
 			local bufnr = args.buf
 			if not utils.is_mybatis_file(bufnr) then
 				return
 			end
-			map("n", "gd", function()
-				jump(bufnr)
-			end, {
-				buffer = bufnr,
-				desc = "Mybatis: navigate from XML",
-			})
-			-- native completion (<C-x><C-o>); only when nothing else claimed omnifunc
-			if vim.bo[bufnr].omnifunc == "" then
-				vim.bo[bufnr].omnifunc = "v:lua.require'nvim-mybatis.completion.omnifunc'.omnifunc"
+			-- attach treesitter highlighting
+			require("nvim-mybatis.parser").start(bufnr)
+			if require("nvim-mybatis.config"):get().lsp then
+				require("nvim-mybatis.lsp").attach(bufnr)
 			end
 			logger.info("XML file loaded successfully")
 		end,
@@ -40,25 +27,19 @@ function M.setup()
 		pattern = "java",
 		group = group,
 		callback = function(args)
-			local bufnr = args.buf
-			if not utils.is_mybatis_file(bufnr) then
-				return
+			if utils.get_module_root() and require("nvim-mybatis.config"):get().lsp then
+				require("nvim-mybatis.lsp").attach(args.buf)
 			end
-			map("n", "gd", function()
-				jump(bufnr)
-			end, {
-				buffer = bufnr,
-				desc = "Mybatis: navigate from java",
-			})
-			logger.info("Java file loaded successfully")
 		end,
 	})
-	-- invalidate the class index when java sources change (new/renamed classes)
+	-- refresh the mapper index entry of the saved file
 	autocmd("BufWritePost", {
-		pattern = "*.java",
+		pattern = "*.xml",
 		group = group,
-		callback = function()
-			require("nvim-mybatis.completion.backend.index").refresh()
+		callback = function(args)
+			if utils.is_mybatis_file(args.buf) then
+				require("nvim-mybatis.index").update_buffer(args.buf)
+			end
 		end,
 	})
 end
