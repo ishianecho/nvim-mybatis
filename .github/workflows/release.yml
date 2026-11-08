@@ -74,6 +74,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Set up Tree-sitter CLI
+        uses: ./.github/actions/setup-env
+        with:
+          tree_sitter: true
+
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:

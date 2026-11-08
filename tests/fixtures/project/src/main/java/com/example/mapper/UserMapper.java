@@ -16,4 +16,6 @@ public interface UserMapper {
 	int updateEmail(Long id, String email);
 
 	int deleteUser(Long id);
+
+	int countByUsername(User user);
 }

@@ -41,7 +41,7 @@ describe("navigator", function()
 
 	it("jumps from a #{} path to the entity field through parameterType", function()
 		helpers.load_buf(XML, "mybatis")
-		assert.truthy(helpers.goto_mark("values (#{username}", 11))
+		assert.truthy(helpers.goto_mark("where lower(username) like #{username}", 30))
 		assert.truthy(navigator.jump())
 		assert.equals("User.java", current_name())
 		assert.truthy(vim.api.nvim_get_current_line():find("String username", 1, true))

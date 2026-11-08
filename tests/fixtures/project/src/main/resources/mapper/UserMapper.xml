@@ -28,4 +28,7 @@
 	<delete id="deleteUser">
 		delete from users where id = #{id}
 	</delete>
+	<select id="countByUsername" parameterType="com.example.entity.User" resultType="int">
+		select count(*) from users where lower(username) like #{username}
+	</select>
 </mapper>
